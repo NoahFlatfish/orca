@@ -12807,7 +12807,9 @@
         },
         "StatusBarProviderColorSetting": {
           "title": "Color usage by provider",
-          "description": "Tint each usage meter in the status bar with its AI provider’s color."
+          "description": "Tint each usage meter in the status bar with its AI provider’s color.",
+          "keywordProvider": "provider",
+          "keywordColor": "color"
         }
       },
       "right": {

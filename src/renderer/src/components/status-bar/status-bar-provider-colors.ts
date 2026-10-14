@@ -30,7 +30,11 @@ export function resolveProviderTint(
   if (settings?.statusBarProviderColorsEnabled !== true) {
     return undefined
   }
+  const custom = settings.statusBarProviderColors?.[provider]?.trim()
+  // Why: an invalid color makes the whole color-mix() invalid and leaves the chip untinted.
   const color =
-    settings.statusBarProviderColors?.[provider]?.trim() || DEFAULT_PROVIDER_COLORS[provider]
+    custom && typeof CSS !== 'undefined' && CSS.supports('color', custom)
+      ? custom
+      : DEFAULT_PROVIDER_COLORS[provider]
   return `color-mix(in srgb, ${color} ${PROVIDER_TINT_PERCENT}%, transparent)`
 }
