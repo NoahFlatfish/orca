@@ -443,7 +443,7 @@ export function PetOverlay(): React.JSX.Element {
         </div>
       </div>
       {/* Why: sibling of the aria-hidden pet box so screen readers still hear the bubble. */}
-      {dragging ? null : <PetSpeechBubble position={position} size={size} />}
+      <PetSpeechBubble position={position} size={size} hidden={dragging} />
     </>
   )
 }

@@ -88,11 +88,13 @@ export function defaultSpeechText(kind: PetSpeechKind): string {
 
 export function PetSpeechBubble({
   position,
-  size
+  size,
+  hidden
 }: {
   position: Position
   size: number
-}): React.JSX.Element | null {
+  hidden: boolean
+}): React.JSX.Element {
   const enabled = useAppStore((s) => s.settings?.petSpeechBubbles !== false)
   const doneText = useAppStore((s) => s.settings?.petSpeechDoneText)
   const waitingText = useAppStore((s) => s.settings?.petSpeechWaitingText)
@@ -100,32 +102,41 @@ export function PetSpeechBubble({
   const reminderMinutes = useAppStore((s) => s.settings?.petSpeechReminderMinutes)
   const { speech, dismiss } = usePetSpeech(enabled, petSpeechReminderMs(reminderMinutes))
 
-  if (!speech) {
-    return null
-  }
-  const template = { done: doneText, waiting: waitingText, reminder: reminderText }[speech.kind]
-  const text = petSpeechText(template, defaultSpeechText(speech.kind), speech.count)
+  const text = speech
+    ? petSpeechText(
+        { done: doneText, waiting: waitingText, reminder: reminderText }[speech.kind],
+        defaultSpeechText(speech.kind),
+        speech.count
+      )
+    : ''
   const below = position.y < BUBBLE_FLIP_THRESHOLD_PX
 
   return (
-    <div
-      className="pointer-events-none fixed z-40 flex justify-end"
-      style={{
-        left: position.x,
-        top: below ? position.y + size : position.y,
-        width: size,
-        transform: below ? undefined : 'translateY(-100%)'
-      }}
-    >
-      <button
-        type="button"
-        role="status"
-        aria-live="polite"
-        onClick={dismiss}
-        className="pointer-events-auto max-w-[240px] cursor-pointer rounded-md border border-border bg-popover px-2.5 py-1.5 text-left text-xs text-popover-foreground shadow-floating"
-      >
+    <>
+      {/* Why: a live region must already be mounted when its text changes, or screen readers skip it. */}
+      <div role="status" aria-live="polite" className="sr-only">
         {text}
-      </button>
-    </div>
+      </div>
+      {/* Why: hide only the visual during a drag so the speech and its timeout survive it. */}
+      {speech && !hidden ? (
+        <div
+          className="pointer-events-none fixed z-40 flex justify-end"
+          style={{
+            left: position.x,
+            top: below ? position.y + size : position.y,
+            width: size,
+            transform: below ? undefined : 'translateY(-100%)'
+          }}
+        >
+          <button
+            type="button"
+            onClick={dismiss}
+            className="pointer-events-auto max-w-[240px] cursor-pointer rounded-md border border-border bg-popover px-2.5 py-1.5 text-left text-xs text-popover-foreground shadow-floating"
+          >
+            {text}
+          </button>
+        </div>
+      ) : null}
+    </>
   )
 }

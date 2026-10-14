@@ -41,7 +41,8 @@ test('pet speaks custom text when an agent finishes', async ({
     { doneText: DONE_TEXT, leafId: PANE_LEAF_ID, worktreeId }
   )
 
-  const bubble = orcaPage.getByRole('status').filter({ hasText: DONE_TEXT })
+  const announcement = orcaPage.getByRole('status').filter({ hasText: DONE_TEXT })
+  const bubble = orcaPage.getByRole('button', { name: DONE_TEXT })
   await expect(bubble).toHaveCount(0)
 
   // Why: the pet mounts lazily; a finish before it mounts is its baseline, not news.
@@ -63,10 +64,12 @@ test('pet speaks custom text when an agent finishes', async ({
   }, pane)
 
   await expect(bubble).toBeVisible({ timeout: 10_000 })
+  await expect(announcement).toHaveCount(1)
   const screenshotPath = testInfo.outputPath('pet-speech-bubble.png')
   await orcaPage.screenshot({ path: screenshotPath })
   await testInfo.attach('pet-speech-bubble', { path: screenshotPath, contentType: 'image/png' })
 
   await bubble.click()
   await expect(bubble).toHaveCount(0)
+  await expect(announcement).toHaveCount(0)
 })
